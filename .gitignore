@@ -2,3 +2,8 @@
 .idea/
 **/__pycache__
 /log/
+# 运行产物 / 下载的模型权重(非源码,忽略)
+/outputs/
+/processed_images/
+/backend/OmniParser/weights/
+/backend/OmniParser/weights_dl/

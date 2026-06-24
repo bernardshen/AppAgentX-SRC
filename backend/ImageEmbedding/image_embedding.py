@@ -85,6 +85,23 @@ class ExtractorConfig:
 # 全局变量
 current_extractor: Optional[ExtractorConfig] = None
 
+
+@app.on_event("startup")
+async def _load_default_model():
+    """启动时自动加载默认模型 resnet50,使服务(含 sbatch 自重启)无需外部手动 /set_model 即可用。
+    依赖本地缓存 + HF_HUB_OFFLINE(由部署 sbatch 设置)。可用 env DEFAULT_FEATURE_MODEL 覆盖。"""
+    import os as _os
+    global current_extractor
+    if current_extractor is not None:
+        return
+    name = _os.environ.get("DEFAULT_FEATURE_MODEL", "resnet50")
+    try:
+        current_extractor = ExtractorConfig(ModelConfig(model_name=name))
+        print(f"[startup] 默认加载特征模型 {name} OK", flush=True)
+    except Exception as e:  # noqa: BLE001
+        print(f"[startup] 默认模型 {name} 加载失败(需先 /set_model): {e}", flush=True)
+
+
 @app.get("/available_models")
 async def get_available_models():
     """获取可用的模型列表"""
